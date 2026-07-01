@@ -10,10 +10,11 @@
     <ImageView
         android:id="@+id/popupImage"
         android:layout_width="match_parent"
-        android:layout_height="200dp"
+        android:layout_height="150dp"
         android:scaleType="centerInside"
         android:layout_marginBottom="16dp"
-        android:contentDescription="Exercise Graphic"/>
+        android:contentDescription="Exercise Graphic"
+        android:visibility="gone"/>
 
     <TextView
         android:id="@+id/popupExerciseName"
@@ -30,15 +31,79 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Step-by-step instructions go here..."
-        android:textSize="16sp"
+        android:textSize="14sp"
         android:textColor="@color/text_secondary"
-        android:layout_marginBottom="24dp"/>
+        android:layout_marginBottom="16dp"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Select Day"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        android:textColor="@color/text_primary"
+        android:layout_marginBottom="4dp"/>
+
+    <Spinner
+        android:id="@+id/popupSpinnerDay"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginBottom="16dp"
+        android:baselineAligned="false">
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginEnd="8dp"
+            android:hint="Weight (lbs)">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/popupEtWeight"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="number" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginEnd="8dp"
+            android:hint="Reps">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/popupEtReps"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="number" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:hint="Sets">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/popupEtSets"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="number" />
+        </com.google.android.material.textfield.TextInputLayout>
+    </LinearLayout>
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnPopupLog"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Log This Exercise"
+        android:text="Add to Routine"
         app:cornerRadius="27dp"
         android:backgroundTint="@color/brand_primary"/>
 
