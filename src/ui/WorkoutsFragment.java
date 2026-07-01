@@ -7,6 +7,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -16,6 +17,7 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
+import com.google.android.material.textfield.TextInputEditText;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -49,22 +51,73 @@ public class WorkoutsFragment extends Fragment {
         dialog.setContentView(popupView);
 
         TextView tvName = popupView.findViewById(R.id.popupExerciseName);
+        EditText etCustomName = new EditText(requireContext()); // Fallback for custom name
         TextView tvDesc = popupView.findViewById(R.id.popupDescription);
         ImageView ivGraphic = popupView.findViewById(R.id.popupImage);
+        Spinner spinnerDay = popupView.findViewById(R.id.popupSpinnerDay);
+        TextInputEditText etWeight = popupView.findViewById(R.id.popupEtWeight);
+        TextInputEditText etReps = popupView.findViewById(R.id.popupEtReps);
+        TextInputEditText etSets = popupView.findViewById(R.id.popupEtSets);
         Button btnAddSet = popupView.findViewById(R.id.btnPopupLog);
 
-        tvName.setText(item.getName());
-        tvDesc.setText(item.getDescription());
-        ivGraphic.setImageResource(item.getImageResourceId());
+        if (item.getName().equals("Custom Workout")) {
+            // Transform the Name TextView into an editable field if it's a custom workout
+            tvName.setVisibility(View.GONE);
+            ViewGroup parent = (ViewGroup) tvName.getParent();
+            int index = parent.indexOfChild(tvName);
+            
+            etCustomName.setHint("Enter Exercise Name");
+            etCustomName.setTextSize(22);
+            etCustomName.setTypeface(null, android.graphics.Typeface.BOLD);
+            parent.addView(etCustomName, index);
+            
+            tvDesc.setText("Enter your custom exercise details below.");
+        } else {
+            tvName.setText(item.getName());
+            tvDesc.setText(item.getDescription());
+        }
+
+        if (item.getImageResourceId() != 0 && !item.getName().equals("Custom Workout")) {
+            ivGraphic.setImageResource(item.getImageResourceId());
+            ivGraphic.setVisibility(View.VISIBLE);
+        } else {
+            ivGraphic.setVisibility(View.GONE);
+        }
+
+        // Setup Spinner for Days
+        String[] days = {"Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"};
+        ArrayAdapter<String> dayAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_item, days);
+        dayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerDay.setAdapter(dayAdapter);
 
         btnAddSet.setOnClickListener(v -> {
-            // Optimization: Automatically add to a default day for now, or you can add a spinner here
-            WorkoutSet newSet = new WorkoutSet("Monday", item.getName(), 0, 0, item.getDescription());
+            String day = spinnerDay.getSelectedItem().toString();
+            String weightStr = etWeight.getText().toString().trim();
+            String repsStr = etReps.getText().toString().trim();
+            String setsStr = etSets.getText().toString().trim();
+
+            if (weightStr.isEmpty() || repsStr.isEmpty() || setsStr.isEmpty()) {
+                Toast.makeText(requireContext(), "Please enter weight, reps, and sets", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            int weight = Integer.parseInt(weightStr);
+            int reps = Integer.parseInt(repsStr);
+            int sets = Integer.parseInt(setsStr);
             
+            String finalName = item.getName();
+            if (item.getName().equals("Custom Workout")) {
+                finalName = etCustomName.getText().toString().trim();
+                if (finalName.isEmpty()) finalName = "Custom Exercise";
+            }
+
+            WorkoutSet newSet = new WorkoutSet(day, finalName, weight, reps, sets, item.getDescription());
+            
+            final String toastName = finalName;
             new Thread(() -> {
                 db.workoutDao().insertWorkout(newSet);
                 requireActivity().runOnUiThread(() -> {
-                    Toast.makeText(requireContext(), item.getName() + " added to routine!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(requireContext(), toastName + " added to " + day + "!", Toast.LENGTH_SHORT).show();
                     dialog.dismiss();
                 });
             }).start();
@@ -75,10 +128,14 @@ public class WorkoutsFragment extends Fragment {
 
     private void loadExerciseCatalog() {
         exerciseList = new ArrayList<>();
-        int icon = android.R.drawable.ic_menu_agenda;
+        int icon = 0;
+        int customIcon = 0;
+
+        // --- CUSTOM ---
+        exerciseList.add(new ExerciseCatalogItem("Custom Workout", "Tap to create your own unique exercise and log it immediately.", customIcon));
 
         // --- CHEST ---
-        exerciseList.add(new ExerciseCatalogItem("Bench Press", "1. Lie flat on a bench.\n2. Grip the bar slightly wider than shoulder-width.\n3. Lower the bar to your chest control.\n4. Press back up.", icon));
+        exerciseList.add(new ExerciseCatalogItem("Bench Press", "1. Lie flat on a bench.\n2. Grip the bar slightly wider than shoulder-width.\n3. Lower the bar to your chest control.\n4. Press back up.", 0));
         exerciseList.add(new ExerciseCatalogItem("Incline Bench Press", "1. Set bench to a 30–45° incline.\n2. Lower the weight to your upper chest.\n3. Press upward explosively.", icon));
         exerciseList.add(new ExerciseCatalogItem("Dumbbell Chest Press", "1. Lie flat on a bench holding dumbbells.\n2. Lower dumbbells beside your chest.\n3. Press upward together.", icon));
         exerciseList.add(new ExerciseCatalogItem("Chest Fly", "1. Hold dumbbells above your chest.\n2. Lower arms out wide with a slight bend.\n3. Bring weights back together.", icon));
