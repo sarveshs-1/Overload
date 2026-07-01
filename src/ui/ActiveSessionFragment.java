@@ -6,7 +6,9 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -20,6 +22,7 @@ public class ActiveSessionFragment extends Fragment {
 
     private RecyclerView rvWorkoutList;
     private TextView tvGreeting;
+    private Button btnFinishWorkout;
     private AppDatabase db;
 
     @Nullable
@@ -29,12 +32,18 @@ public class ActiveSessionFragment extends Fragment {
 
         rvWorkoutList = view.findViewById(R.id.rvWorkoutList);
         tvGreeting = view.findViewById(R.id.tvGreeting);
+        btnFinishWorkout = view.findViewById(R.id.btnFinishWorkout);
         rvWorkoutList.setLayoutManager(new LinearLayoutManager(getContext()));
         
         db = AppDatabase.getInstance(getContext());
         
         displayGreeting();
         refreshHistory();
+
+        btnFinishWorkout.setOnClickListener(v -> {
+            Toast.makeText(requireContext(), "Workout Finished! Great job!", Toast.LENGTH_LONG).show();
+            // In a real app, you might navigate away or save session stats here.
+        });
 
         return view;
     }
@@ -53,7 +62,7 @@ public class ActiveSessionFragment extends Fragment {
         new Thread(() -> {
             List<WorkoutSet> sets = db.workoutDao().getWorkoutsForDay(today);
             requireActivity().runOnUiThread(() -> {
-                WorkoutAdapter adapter = new WorkoutAdapter(sets);
+                WorkoutAdapter adapter = new WorkoutAdapter(sets, this::refreshHistory);
                 rvWorkoutList.setAdapter(adapter);
             });
         }).start();
