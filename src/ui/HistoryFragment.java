@@ -35,9 +35,10 @@ public class HistoryFragment extends Fragment {
         new Thread(() -> {
             List<WorkoutSet> sets = db.workoutDao().getAllWorkoutsSorted();
             requireActivity().runOnUiThread(() -> {
-                WorkoutAdapter adapter = new WorkoutAdapter(sets);
+                WorkoutAdapter adapter = new WorkoutAdapter(sets, this::loadHistory);
                 rvHistoryLogs.setAdapter(adapter);
             });
         }).start();
     }
+}
 }
